@@ -1,5 +1,6 @@
 package com.coderscampus;
 
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,16 +8,33 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Comparator;
 
+
 public class StudentService {
+	
+	WriteFile newFile = new WriteFile();
 
-	Student[] compsciStudent = getCompsciStudent();
-	Student[] APMathStudent = getAPMathStudent();
-	Student[] statStudent = getStatStudent();
+	Student[] compsciStudent = new Student[40];
+	Student[] APMathStudent =  new Student[40];
+	Student[] statStudent = new Student[40];
+	
+	
+	public StudentService() {
+		readStudentsFromFile();
+	}
 
-	public Student[] readFromFile() {
-		int i = 0;
+	public void createStudentFileByCourse() {
+		newFile.writeStudentsToFile(compsciStudent, "course1.csv");
+		newFile.writeStudentsToFile(APMathStudent, "course2.csv");
+		newFile.writeStudentsToFile(statStudent, "course3.csv");
+	}
+	
+	public void readStudentsFromFile() {
 		String line = "";
-		Student[] student = new Student[100];
+		
+		int compsciIdx = 0;
+		int mathIdx = 0;
+		int statIdx = 0;
+		
 		try (BufferedReader fileReader = new BufferedReader(new FileReader("student-master-list.csv"))) {
 			fileReader.readLine();
 			while ((line = fileReader.readLine()) != null) {
@@ -26,10 +44,17 @@ public class StudentService {
 				String course = info[2];
 				String Strgrade = info[3];
 				Integer grade = Integer.parseInt(Strgrade);
-				student[i] = new Student(id, name, course, grade);
-				i++;
+				Student studentInfo = new Student(id, name, course, grade);
+				if (studentInfo.getCourse().matches("^[COMPSCI]+\\s[0-9]{1,3}$")) {
+					compsciStudent[compsciIdx++] = studentInfo;
+				}
+				if (studentInfo.getCourse().matches("^[APMTH]+\\s[0-9]{1,3}$")) {
+					APMathStudent[mathIdx++] = studentInfo;
+				}
+				if (studentInfo.getCourse().matches("^[STAT]+\\s[0-9]{1,3}$")) {
+					statStudent[statIdx++] = studentInfo;
+				}
 			}
-			return student;
 
 		} catch (FileNotFoundException e) {
 			System.out.println("A FileNotFoundException has occured");
@@ -38,78 +63,33 @@ public class StudentService {
 			System.out.println("An IOException has occured");
 			e.printStackTrace();
 		}
-
-		return student;
 	}
 
 	public Student[] getCompsciStudent() {
-		Student[] student = new Student[100];
-		student = readFromFile();
-		Student[] compSci = new Student[100];
-		int count = 0;
-		int j = 0;
-		for (int i = 0; i < student.length; i++) {
-			if (student[i].getCourse().matches("^[COMPSCI]+\\s[0-9]{1,3}$")) {
-				compSci[i] = student[i];
-				count++;
-			}
-		}
-		Student[] compSci2 = new Student[count];
-		for (int k = 0; k < compSci.length; k++) {
-			if (compSci[k] != null) {
-				compSci2[j] = compSci[k];
-				j++;
-			}
-		}
-		Arrays.sort(compSci2);
-		return compSci2;
+		return getSortedList(compsciStudent);
 	}
 
 	public Student[] getAPMathStudent() {
-		Student[] student = new Student[101];
-		student = readFromFile();
-		Student[] math = new Student[100];
-		int count = 0;
-		int j = 0;
-		for (int i = 0; i < student.length; i++) {
-			if (student[i].getCourse().matches("^[APMTH]+\\s[0-9]{1,3}$")) {
-				math[i] = student[i];
-				count++;
-			}
-		}
-		Student[] math2 = new Student[count];
-		for (int k = 0; k < math.length; k++) {
-			if (math[k] != null) {
-				math2[j] = math[k];
-				j++;
-			}
-		}
-		Arrays.sort(math2);
-		return math2;
+		return getSortedList(APMathStudent);
 	}
 
 	public Student[] getStatStudent() {
-		Student[] student = new Student[101];
-		student = readFromFile();
-
-		Student[] stat = new Student[100];
-		int count = 0;
-		int j = 0;
-		for (int i = 0; i < student.length; i++) {
-			if (student[i].getCourse().matches("^[STAT]+\\s[0-9]{1,3}$")) {
-				stat[i] = student[i];
-				count++;
-			}
-		}
-		Student[] stat2 = new Student[count];
-		for (int k = 0; k < stat.length; k++) {
-			if (stat[k] != null) {
-				stat2[j] = stat[k];
-				j++;
-			}
-		}
-		Arrays.sort(stat2);
-		return stat2;
+		return getSortedList(statStudent);
 	}
+	
+	public Student[] getSortedList(Student[] students) {
+		Arrays.sort(students, new Comparator<Student>() {
 
+			@Override
+			public int compare(Student student1, Student student2) {
+				if (student1 == null || student2 == null) {
+				return 0;
+				} else {
+					return student2.compareTo(student1);
+				}
+			}
+			
+		});
+		return students;
+	}
 }
